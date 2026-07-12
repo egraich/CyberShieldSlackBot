@@ -24,31 +24,6 @@ def register_handlers(app: AsyncApp, security: SecurityService):
 
         return await security.get_ai_verdict(payload_text, telemetry)
 
-    @app.event("message")
-    async def handle_direct_messages(event, client):
-        if event.get("subtype") is not None:
-            return
-            
-        raw_input = event.get("text", "").strip()
-        cid = event.get("channel")
-        
-        if not raw_input:
-            return
-
-        initial_msg = await client.chat_postMessage(
-            channel=cid,
-            text="Wait for analysis..."
-        )
-        msg_ts = initial_msg["ts"]
-        
-        ai_out = await inspect_payload(raw_input)
-        
-        await client.chat_update(
-            channel=cid,
-            ts=msg_ts,
-            text=ai_out
-        )
-
     @app.command("/scamscan")
     async def handle_scamscan(ack, command, client):
         await ack()
