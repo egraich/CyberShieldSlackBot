@@ -56,5 +56,5 @@ def register_handlers(app: AsyncApp, security: SecurityService):
         ai_out = await inspect_payload(raw_input)
         await client.chat_postMessage(
             channel=cid,
-            text=f"🛡️ *CyberShield Scan Request* by <@{uid}>:\n\n{ai_out}"
+            text=f"*CyberShield Scan Request* by <@{uid}>:\n\n{ai_out}"
         )
