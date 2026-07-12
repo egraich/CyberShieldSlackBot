@@ -1,6 +1,7 @@
 from slack_bolt.async_app import AsyncApp
 from services import SecurityService
 from config import Config
+from database import log_ai_scan, log_vt_scan
 
 def register_handlers(app: AsyncApp, security: SecurityService):
     
@@ -44,19 +45,62 @@ def register_handlers(app: AsyncApp, security: SecurityService):
         msg_ts = initial_msg["ts"]
         
         ai_out = await inspect_payload(raw_input)
-        
+
         await client.chat_update(
             channel=cid,
             ts=msg_ts,
             text=ai_out
         )
+
+
+        score = SecurityService.parse_risk_score(ai_out)
+        if score is not None:
+            await log_ai_scan(score)
+
+#--------------------------------------
     
+    @app.shortcut("scan_message")
+    async def handle_shortcut(ack, shortcut, client):
+        await ack()
+        
+        msg_obj = shortcut.get("message", {})
+        raw_input = msg_obj.get("text", "").strip()
+        uid = shortcut.get("user", {}).get("id")
+        cid = shortcut.get("channel", {}).get("id")
+        
+        if not raw_input:
+            await client.chat_postEphemeral(
+                channel=cid,
+                user=uid,
+                text="Error: Cannot scan an empty message."
+            )
+            return
+
+        initial_msg = await client.chat_postMessage(
+            channel=cid,
+            text=f"CyberShield Scan Request by <@{uid}>:\nWait for analysis..."
+        )
+        msg_ts = initial_msg["ts"]
+
+        ai_out = await inspect_payload(raw_input)
+
+        await client.chat_update(
+            channel=cid,
+            ts=msg_ts,
+            text=f"CyberShield Scan Request by <@{uid}>:\n\n{ai_out}"
+        )
+
+        score = SecurityService.parse_risk_score(ai_out)
+        if score is not None:
+            await log_ai_scan(score)
+        
+#--------------------------------------
+
     @app.command("/scanlink")
     async def handle_scanlink(ack, command, client):
         await ack()
         raw_input = command.get("text", "").strip()
         cid = command.get("channel_id")
-        
         target_url = security.extract_url(raw_input)
         if not target_url:
             await client.chat_postMessage(
@@ -92,33 +136,8 @@ def register_handlers(app: AsyncApp, security: SecurityService):
             text=out_text
         )
 
-    @app.shortcut("scan_message")
-    async def handle_shortcut(ack, shortcut, client):
-        await ack()
-        
-        msg_obj = shortcut.get("message", {})
-        raw_input = msg_obj.get("text", "").strip()
-        uid = shortcut.get("user", {}).get("id")
-        cid = shortcut.get("channel", {}).get("id")
-        
-        if not raw_input:
-            await client.chat_postEphemeral(
-                channel=cid,
-                user=uid,
-                text="Error: Cannot scan an empty message."
-            )
-            return
+        vt_res = await security.scan_link_deep(target_url)
+        if vt_res.get("status") == "success":
+            await log_vt_scan(vt_res["malicious"], vt_res["total"])
 
-        initial_msg = await client.chat_postMessage(
-            channel=cid,
-            text=f"CyberShield Scan Request by <@{uid}>:\nWait for analysis..."
-        )
-        msg_ts = initial_msg["ts"]
-        
-        ai_out = await inspect_payload(raw_input)
-        
-        await client.chat_update(
-            channel=cid,
-            ts=msg_ts,
-            text=f"CyberShield Scan Request by <@{uid}>:\n\n{ai_out}"
-        )
+#--------------------------------------
