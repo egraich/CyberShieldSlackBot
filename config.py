@@ -47,3 +47,4 @@ Strict Output Constraint: Do not use HTML tags like <b> or <i>. Use Slack Markdo
     VT_TIMEOUT = "⏱️ *VirusTotal Timeout:* Gateway latency too high."
     VT_CONNECTION_ERROR = "🌐 *Network Error:* Failed to reach threat intelligence servers."
     AI_ERROR = "❌ *AI Core Failure:* Incident analysis aborted: {error}"
+    GROQ_MODEL = "llama-3.3-70b-versatile"

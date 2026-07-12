@@ -79,7 +79,7 @@ class SecurityService:
                 system_prompt += vt_context
 
             response = await self.groq_client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model=Config.GROQ_MODEL,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": text}
