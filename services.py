@@ -1,5 +1,6 @@
 import os
 import re
+import asyncio
 import base64
 import aiohttp
 from groq import AsyncGroq
@@ -89,3 +90,42 @@ class SecurityService:
             return response.choices[0].message.content
         except Exception as e:
             return Config.AI_ERROR.format(error=str(e))
+
+    async def scan_link_deep(self, url: str) -> dict:
+        if not self.vt_api_key:
+            return {"status": "no_key"}
+            
+        headers = {"x-apikey": self.vt_api_key}
+        url_id = base64.urlsafe_b64encode(url.encode()).decode().strip("=")
+        
+        async with self.session.get(f"https://www.virustotal.com/api/v3/urls/{url_id}", headers=headers) as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                stats = data["data"]["attributes"]["last_analysis_stats"]
+                return {"status": "success", "malicious": stats["malicious"], "total": sum(stats.values())}
+            elif resp.status == 404:
+                return await self._submit_and_poll(url, headers)
+            elif resp.status == 401:
+                return {"status": "error", "code": 401}
+            else:
+                return {"status": "error", "code": resp.status}
+
+    async def _submit_and_poll(self, url: str, headers: dict) -> dict:
+        payload = {"url": url}
+        async with self.session.post("https://www.virustotal.com/api/v3/urls", headers=headers, data=payload) as resp:
+            if resp.status != 200:
+                return {"status": "error", "code": resp.status}
+            data = await resp.json()
+            analysis_id = data["data"]["id"]
+
+        for _ in range(20):
+            await asyncio.sleep(3)
+            async with self.session.get(f"https://www.virustotal.com/api/v3/analyses/{analysis_id}", headers=headers) as resp:
+                if resp.status != 200:
+                    continue
+                data = await resp.json()
+                if data["data"]["attributes"]["status"] == "completed":
+                    stats = data["data"]["attributes"]["stats"]
+                    return {"status": "success", "malicious": stats["malicious"], "total": sum(stats.values())}
+        
+        return {"status": "timeout"}

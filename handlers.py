@@ -50,6 +50,47 @@ def register_handlers(app: AsyncApp, security: SecurityService):
             ts=msg_ts,
             text=ai_out
         )
+    
+    @app.command("/scanlink")
+    async def handle_scanlink(ack, command, client):
+        await ack()
+        raw_input = command.get("text", "").strip()
+        cid = command.get("channel_id")
+        
+        target_url = security.extract_url(raw_input)
+        if not target_url:
+            await client.chat_postMessage(
+                channel=cid,
+                text="Error: Please provide a valid URL."
+            )
+            return
+
+        initial_msg = await client.chat_postMessage(
+            channel=cid,
+            text="Scanning link... If it's new, this may take up to a minute."
+        )
+        msg_ts = initial_msg["ts"]
+        
+        vt_res = await security.scan_link_deep(target_url)
+        status = vt_res.get("status")
+        
+        if status == "success":
+            if vt_res["malicious"] > 0:
+                out_text = Config.VT_THREAT.format(malicious=vt_res["malicious"], total=vt_res["total"])
+            else:
+                out_text = Config.VT_CLEAN.format(total=vt_res["total"])
+        elif status == "timeout":
+            out_text = Config.VT_TIMEOUT
+        elif status == "no_key":
+            out_text = Config.VT_NO_KEY
+        else:
+            out_text = Config.VT_ERROR.format(code=vt_res.get("code", "unknown"))
+
+        await client.chat_update(
+            channel=cid,
+            ts=msg_ts,
+            text=out_text
+        )
 
     @app.shortcut("scan_message")
     async def handle_shortcut(ack, shortcut, client):
