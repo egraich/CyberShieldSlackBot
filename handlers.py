@@ -24,17 +24,57 @@ def register_handlers(app: AsyncApp, security: SecurityService):
 
         return await security.get_ai_verdict(payload_text, telemetry)
 
-    @app.command("/scamscan")
-    async def handle_scamscan(ack, command, respond):
-        await ack()
-        raw_input = command.get("text", "").strip()
-        
-        if not raw_input:
-            await respond("❌ Please provide text or a URL to scan. Example: `/scamscan suspicious-site.com`")
+    @app.event("message")
+    async def handle_direct_messages(event, client):
+        if event.get("subtype") is not None:
             return
             
+        raw_input = event.get("text", "").strip()
+        cid = event.get("channel")
+        
+        if not raw_input:
+            return
+
+        initial_msg = await client.chat_postMessage(
+            channel=cid,
+            text="Wait for analysis..."
+        )
+        msg_ts = initial_msg["ts"]
+        
         ai_out = await inspect_payload(raw_input)
-        await respond(ai_out, response_type="in_channel")
+        
+        await client.chat_update(
+            channel=cid,
+            ts=msg_ts,
+            text=ai_out
+        )
+
+    @app.command("/scamscan")
+    async def handle_scamscan(ack, command, client):
+        await ack()
+        raw_input = command.get("text", "").strip()
+        cid = command.get("channel_id")
+        
+        if not raw_input:
+            await client.chat_postMessage(
+                channel=cid,
+                text="Error: Please provide text or a URL to scan."
+            )
+            return
+            
+        initial_msg = await client.chat_postMessage(
+            channel=cid,
+            text="Wait for analysis..."
+        )
+        msg_ts = initial_msg["ts"]
+        
+        ai_out = await inspect_payload(raw_input)
+        
+        await client.chat_update(
+            channel=cid,
+            ts=msg_ts,
+            text=ai_out
+        )
 
     @app.shortcut("scan_message")
     async def handle_shortcut(ack, shortcut, client):
@@ -49,12 +89,20 @@ def register_handlers(app: AsyncApp, security: SecurityService):
             await client.chat_postEphemeral(
                 channel=cid,
                 user=uid,
-                text="❌ Cannot scan an empty message."
+                text="Error: Cannot scan an empty message."
             )
             return
 
-        ai_out = await inspect_payload(raw_input)
-        await client.chat_postMessage(
+        initial_msg = await client.chat_postMessage(
             channel=cid,
-            text=f"*CyberShield Scan Request* by <@{uid}>:\n\n{ai_out}"
+            text=f"CyberShield Scan Request by <@{uid}>:\nWait for analysis..."
+        )
+        msg_ts = initial_msg["ts"]
+        
+        ai_out = await inspect_payload(raw_input)
+        
+        await client.chat_update(
+            channel=cid,
+            ts=msg_ts,
+            text=f"CyberShield Scan Request by <@{uid}>:\n\n{ai_out}"
         )
