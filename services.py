@@ -21,6 +21,17 @@ class SecurityService:
     async def close(self):
         await self.session.close()
 
+    def parse_risk_score(text: str):
+            
+        first_line = text.splitlines()[0]
+    
+        match = re.search(r"(\d{1,3})%", first_line)
+        
+        if match:
+            val = int(match.group(1))
+            return val if 0 <= val <= 100 else None
+        return None
+    
     def extract_url(self, text: str) -> str | None:
         match = self.url_pattern.search(text)
         if not match:
