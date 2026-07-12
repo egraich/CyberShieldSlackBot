@@ -2,7 +2,7 @@ import os
 import asyncio
 from dotenv import load_dotenv
 from slack_bolt.async_app import AsyncApp
-from slack_bolt.adapter.socket_mode.async_handler import SocketModeHandler
+from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 
 from services import SecurityService
 from handlers import register_handlers
@@ -15,7 +15,7 @@ async def main():
     
     register_handlers(app, security)
 
-    handler = SocketModeHandler(app, os.environ.get("SLACK_APP_TOKEN"))
+    handler = AsyncSocketModeHandler(app, os.environ.get("SLACK_APP_TOKEN"))
     
     try:
         await handler.start_async()
