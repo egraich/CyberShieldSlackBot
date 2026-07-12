@@ -3,6 +3,7 @@ import asyncio
 from dotenv import load_dotenv
 from slack_bolt.async_app import AsyncApp
 from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
+from database import init_db
 
 from services import SecurityService
 from handlers import register_handlers
@@ -12,7 +13,8 @@ load_dotenv()
 async def main():
     app = AsyncApp(token=os.environ.get("SLACK_BOT_TOKEN"))
     security = SecurityService()
-    
+    init_db()
+
     register_handlers(app, security)
 
     handler = AsyncSocketModeHandler(app, os.environ.get("SLACK_APP_TOKEN"))
