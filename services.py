@@ -9,12 +9,16 @@ class SecurityService:
     def __init__(self):
         self.groq_client = AsyncGroq(api_key=os.environ.get("GROQ_API_KEY"))
         self.vt_api_key = os.environ.get("VIRUSTOTAL_API_KEY")
+        self.session = aiohttp.ClientSession()
         self.url_pattern = re.compile(
             r'(?:https?://)?'
             r'(?:[a-zA-Z0-9\-]+\.)+'
             r'[a-zA-Z]{2,24}'
             r'(?:/[^\s>|]*[^\s>|.,?!])?'
         )
+
+    async def close(self):
+        await self.session.close()
 
     def extract_url(self, text: str) -> str | None:
         match = self.url_pattern.search(text)
@@ -34,11 +38,10 @@ class SecurityService:
         api_url = f"https://www.virustotal.com/api/v3/urls/{url_id}"
         headers = {"x-api-key": self.vt_api_key}
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(api_url, headers=headers, timeout=10) as response:
-                if response.status == 200:
-                    return response.status, await response.json()
-                return response.status, None
+        async with self.session.get(api_url, headers=headers, timeout=10) as response:
+            if response.status == 200:
+                return response.status, await response.json()
+            return response.status, None
 
     async def scan_url_virustotal(self, url: str) -> dict:
         if not self.vt_api_key:
