@@ -21,7 +21,7 @@ class SecurityService:
     async def close(self):
         await self.session.close()
 
-    def parse_risk_score(text: str):
+    def parse_risk_score(self, text: str):
             
         first_line = text.splitlines()[0]
     

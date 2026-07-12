@@ -13,7 +13,7 @@ load_dotenv()
 async def main():
     app = AsyncApp(token=os.environ.get("SLACK_BOT_TOKEN"))
     security = SecurityService()
-    init_db()
+    await init_db()
 
     register_handlers(app, security)
 
