@@ -53,12 +53,9 @@ def register_handlers(app: AsyncApp, security: SecurityService):
             text=ai_out
         )
 
-
-        score = SecurityService.parse_risk_score(ai_out)
+        score = security.parse_risk_score(ai_out)
         if score is not None:
             await log_ai_scan(score)
-
-#--------------------------------------
     
     @app.shortcut("scan_message")
     async def handle_shortcut(ack, shortcut, client):
@@ -91,11 +88,9 @@ def register_handlers(app: AsyncApp, security: SecurityService):
             text=f"CyberShield Scan Request by <@{uid}>:\n\n{ai_out}"
         )
 
-        score = SecurityService.parse_risk_score(ai_out)
+        score = security.parse_risk_score(ai_out)
         if score is not None:
             await log_ai_scan(score)
-        
-#--------------------------------------
 
     @app.command("/scanlink")
     async def handle_scanlink(ack, command, client):
@@ -137,18 +132,14 @@ def register_handlers(app: AsyncApp, security: SecurityService):
             text=out_text
         )
 
-        vt_res = await security.scan_link_deep(target_url)
         if vt_res.get("status") == "success":
             await log_vt_scan(vt_res["malicious"], vt_res["total"])
-
-#--------------------------------------
 
     @app.command("/cyberstats")
     async def handle_cyberstats(ack, respond):
         await ack()
         
         async with aiosqlite.connect(DB_PATH) as db:
-
             ai_stats = await db.execute_fetchall("SELECT COUNT(*), AVG(score) FROM ai_scans")
             ai_total, ai_avg = ai_stats[0]
             

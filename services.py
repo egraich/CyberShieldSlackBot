@@ -22,15 +22,14 @@ class SecurityService:
         await self.session.close()
 
     def parse_risk_score(self, text: str):
-            
-        first_line = text.splitlines()[0]
-    
-        match = re.search(r"(\d{1,3})%", first_line)
-        
-        if match:
-            val = int(match.group(1))
-            return val if 0 <= val <= 100 else None
-        return None
+            if not text:
+                return None
+            first_line = text.splitlines()[0]
+            match = re.search(r"(\d{1,3})%", first_line)
+            if match:
+                val = int(match.group(1))
+                return val if 0 <= val <= 100 else None
+            return None
     
     def extract_url(self, text: str) -> str | None:
         match = self.url_pattern.search(text)
@@ -48,7 +47,7 @@ class SecurityService:
 
     async def _fetch_vt_data(self, url_id: str) -> tuple[int, dict | None]:
         api_url = f"https://www.virustotal.com/api/v3/urls/{url_id}"
-        headers = {"x-api-key": self.vt_api_key}
+        headers = {"x-apikey": self.vt_api_key}
 
         async with self.session.get(api_url, headers=headers, timeout=10) as response:
             if response.status == 200:
