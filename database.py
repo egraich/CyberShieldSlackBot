@@ -5,6 +5,7 @@ DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cyber_stats.
 
 async def init_db():
     async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("PRAGMA journal_mode=WAL;")
         await db.execute("""
             CREATE TABLE IF NOT EXISTS ai_scans (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
