@@ -27,30 +27,28 @@ def register_handlers(app: AsyncApp, security: SecurityService):
         return await security.get_ai_verdict(payload_text, telemetry)
 
     @app.command("/scamscan")
-    async def handle_scamscan(ack, command, client):
+    async def handle_scamscan(ack, command, respond):
         await ack()
         raw_input = command.get("text", "").strip()
-        cid = command.get("channel_id")
         
         if not raw_input:
-            await client.chat_postMessage(
-                channel=cid,
-                text="Error: Please provide text or a URL to scan."
+            await respond(
+                text="Error: Please provide text or a URL to scan.",
+                response_type="ephemeral"
             )
             return
             
-        initial_msg = await client.chat_postMessage(
-            channel=cid,
-            text="Wait for analysis..."
+        await respond(
+            text="Wait for analysis...",
+            response_type="ephemeral"
         )
-        msg_ts = initial_msg["ts"]
         
         ai_out = await inspect_payload(raw_input)
 
-        await client.chat_update(
-            channel=cid,
-            ts=msg_ts,
-            text=ai_out
+        await respond(
+            text=ai_out,
+            replace_original=True,
+            response_type="ephemeral"
         )
 
         score = security.parse_risk_score(ai_out)
@@ -58,34 +56,30 @@ def register_handlers(app: AsyncApp, security: SecurityService):
             await log_ai_scan(score)
     
     @app.shortcut("scan_message")
-    async def handle_shortcut(ack, shortcut, client):
+    async def handle_shortcut(ack, shortcut, respond):
         await ack()
         
         msg_obj = shortcut.get("message", {})
         raw_input = msg_obj.get("text", "").strip()
-        uid = shortcut.get("user", {}).get("id")
-        cid = shortcut.get("channel", {}).get("id")
         
         if not raw_input:
-            await client.chat_postEphemeral(
-                channel=cid,
-                user=uid,
-                text="Error: Cannot scan an empty message."
+            await respond(
+                text="Error: Cannot scan an empty message.",
+                response_type="ephemeral"
             )
             return
 
-        initial_msg = await client.chat_postMessage(
-            channel=cid,
-            text=f"CyberShield Scan Request by <@{uid}>:\nWait for analysis..."
+        await respond(
+            text="Wait for analysis...",
+            response_type="ephemeral"
         )
-        msg_ts = initial_msg["ts"]
 
         ai_out = await inspect_payload(raw_input)
 
-        await client.chat_update(
-            channel=cid,
-            ts=msg_ts,
-            text=f"CyberShield Scan Request by <@{uid}>:\n\n{ai_out}"
+        await respond(
+            text=ai_out,
+            replace_original=True,
+            response_type="ephemeral"
         )
 
         score = security.parse_risk_score(ai_out)
@@ -93,23 +87,21 @@ def register_handlers(app: AsyncApp, security: SecurityService):
             await log_ai_scan(score)
 
     @app.command("/scanlink")
-    async def handle_scanlink(ack, command, client):
+    async def handle_scanlink(ack, command, respond):
         await ack()
         raw_input = command.get("text", "").strip()
-        cid = command.get("channel_id")
         target_url = security.extract_url(raw_input)
         if not target_url:
-            await client.chat_postMessage(
-                channel=cid,
-                text="Error: Please provide a valid URL."
+            await respond(
+                text="Error: Please provide a valid URL.",
+                response_type="ephemeral"
             )
             return
 
-        initial_msg = await client.chat_postMessage(
-            channel=cid,
-            text="Scanning link... If it's new, this may take up to a minute."
+        await respond(
+            text="Scanning link... If it's new, this may take up to a minute.",
+            response_type="ephemeral"
         )
-        msg_ts = initial_msg["ts"]
         
         vt_res = await security.scan_link_deep(target_url)
         status = vt_res.get("status")
@@ -126,10 +118,10 @@ def register_handlers(app: AsyncApp, security: SecurityService):
         else:
             out_text = Config.VT_ERROR.format(code=vt_res.get("code", "unknown"))
 
-        await client.chat_update(
-            channel=cid,
-            ts=msg_ts,
-            text=out_text
+        await respond(
+            text=out_text,
+            replace_original=True,
+            response_type="ephemeral"
         )
 
         if vt_res.get("status") == "success":
@@ -165,4 +157,4 @@ def register_handlers(app: AsyncApp, security: SecurityService):
             f"   Safe/Clean: `{vt_safe}`"
         )
         
-        await respond(stats_msg)
+        await respond(text=stats_msg, response_type="ephemeral")
