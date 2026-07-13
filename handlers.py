@@ -1,7 +1,8 @@
 from slack_bolt.async_app import AsyncApp
 from services import SecurityService
 from config import Config
-from database import log_ai_scan, log_vt_scan
+from database import log_ai_scan, log_vt_scan, DB_PATH
+import aiosqlite
 
 def register_handlers(app: AsyncApp, security: SecurityService):
     
@@ -141,3 +142,36 @@ def register_handlers(app: AsyncApp, security: SecurityService):
             await log_vt_scan(vt_res["malicious"], vt_res["total"])
 
 #--------------------------------------
+
+    @app.command("/cyberstats")
+    async def handle_cyberstats(ack, respond):
+        await ack()
+        
+        async with aiosqlite.connect(DB_PATH) as db:
+
+            ai_stats = await db.execute_fetchall("SELECT COUNT(*), AVG(score) FROM ai_scans")
+            ai_total, ai_avg = ai_stats[0]
+            
+            vt_stats = await db.execute_fetchall("SELECT COUNT(*), COUNT(CASE WHEN malicious > 0 THEN 1 END) FROM vt_scans")
+            vt_total, vt_threats = vt_stats[0]
+            vt_threats = vt_threats or 0
+            vt_safe = vt_total - vt_threats
+
+        if ai_avg is not None:
+            ai_display = f"{round(ai_avg, 1)}%"
+        else:
+            ai_display = "No valid data (errors/empty)"
+
+        stats_msg = (
+            f"*CyberShield Usage Stats:*\n"
+            f"━━━━━━━━━━━━━━━━━━\n"
+            f"   *AI Scans (`/scamscan`):*\n"
+            f"   Total: `{ai_total}`\n"
+            f"   Avg Risk Score: `{ai_display}`\n\n"
+            f"   *Link Scans (`/scanlink`):*\n"
+            f"   Total: `{vt_total}`\n"
+            f"   Threats Detected: `{vt_threats}`\n"
+            f"   Safe/Clean: `{vt_safe}`"
+        )
+        
+        await respond(stats_msg)
