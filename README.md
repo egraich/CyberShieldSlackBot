@@ -34,6 +34,7 @@ A Slack bot that checks messages and links for scams, phishing, and social engin
 1. Clone the repository:
     ```bash
     git clone https://github.com/egraich/cybershieldslackbot.git
+    cd cybershieldslackbot
     ```
 
 2. Install the dependencies:
