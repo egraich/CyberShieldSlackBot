@@ -65,3 +65,5 @@ For 24/7 uptime, the bot is deployed on [HackClub Nest](https://nest.hackclub.co
 * **slack-bolt** – Async Slack framework core.
 * **Groq SDK** – Llama 3.3 inference provider.
 * **VirusTotal API v3** – URL reputation telemetry.
+
+Made by [egraich](https://github.com/egraich) <3
