@@ -11,7 +11,7 @@ A Slack bot that checks messages and links for scams, phishing, and social engin
 
 <img width="955" height="187" alt="image" src="https://github.com/user-attachments/assets/6f1577da-4a5d-400f-8832-586f6cab5fce" />
 
-3. Enjoy answer!
+3. Enjoy the analysis!
 
 <img width="1036" height="384" alt="image" src="https://github.com/user-attachments/assets/98c09727-721e-4884-b02a-8346c47cd75d" />
 
@@ -27,13 +27,13 @@ A Slack bot that checks messages and links for scams, phishing, and social engin
 ### Requirements
 * Python 3.10+
 * Groq API Key & VirusTotal API Key
-* Your own Slack App: You need to create an app on the Slack API dashboard, enable Socket Mode, grant required bot permissions, and get your Bot Token (`xoxb-`) and App Token (`xapp-`) - **[HackClub Slack Bot Guide](https://stardance.hackclub.com/missions/slack-bot/guide)**.
+* Your own Slack App: You need to create an app on the Slack API dashboard, enable Socket Mode, grant required bot permissions, and get your Bot Token (`xoxb-`) and App Token (`xapp-`). Check out the **[HackClub Slack Bot Guide](https://stardance.hackclub.com/missions/slack-bot/guide)** for more details.
 
 ### Setup
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/egraich/cybershieldslackbot
+    git clone https://github.com/egraich/cybershieldslackbot.git
     ```
 
 2. Install the dependencies:
@@ -41,7 +41,7 @@ A Slack bot that checks messages and links for scams, phishing, and social engin
    pip install -r requirements.txt
    ```
 
-3. Create a `.env` file in the root folder and add your specific tokens:
+3. Create a `.env` file in the root folder and add your secret tokens:
    ```
    SLACK_BOT_TOKEN=xoxb-your-slack-bot-token
    SLACK_APP_TOKEN=xapp-your-slack-app-token
@@ -57,6 +57,8 @@ A Slack bot that checks messages and links for scams, phishing, and social engin
 ## How It Works
 
 The entire backend is built using async libraries (`slack-bolt`, `aiohttp`, and `aiosqlite`). To prevent file-locking crashes when multiple users trigger scans simultaneously, the database is initialized in WAL (Write-Ahead Logging) mode.
+
+For 24/7 uptime, the bot is deployed on [HackClub Nest](https://nest.hackclub.com) via Docker.
 
 ## Credits
 
