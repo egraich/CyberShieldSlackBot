@@ -6,11 +6,14 @@ A Slack bot that checks messages and links for scams, phishing, and social engin
 
 ## Quick Start
 
-1. Add the bot to your Slack workspace using the install link above.
-2. Type `/scamscan` followed by any text or links in a channel:
-   ```bash
-   /scamscan check this text out [http://sketchy-link.com](http://sketchy-link.com)
-   ```
+1. Go to [HackClub Slack Workspace](https://hackclub.enterprise.slack.com).
+2. Type `/scamscan` followed by any text or links in any channel or in DM `@CyberShieldBot`:
+
+<img width="955" height="187" alt="image" src="https://github.com/user-attachments/assets/6f1577da-4a5d-400f-8832-586f6cab5fce" />
+
+3. Enjoy answer!
+
+<img width="1036" height="384" alt="image" src="https://github.com/user-attachments/assets/98c09727-721e-4884-b02a-8346c47cd75d" />
 
 ## Features
 
