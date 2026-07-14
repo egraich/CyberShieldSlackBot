@@ -1,3 +1,5 @@
+# Copyright (c) 2026 egraich
+
 from slack_bolt.async_app import AsyncApp
 from services import SecurityService
 from config import Config

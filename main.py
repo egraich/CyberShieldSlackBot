@@ -1,3 +1,5 @@
+# Copyright (c) 2026 egraich
+
 import os
 import asyncio
 from dotenv import load_dotenv

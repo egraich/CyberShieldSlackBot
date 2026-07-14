@@ -1,3 +1,5 @@
+# Copyright (c) 2026 egraich
+
 import os
 import re
 import asyncio
