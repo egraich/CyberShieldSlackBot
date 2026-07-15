@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   slackbot:
     build:
@@ -11,3 +9,5 @@ services:
       - ../.env
     volumes:
       - ../cyber_stats.db:/app/cyber_stats.db
+    networks:
+      - slacknet
