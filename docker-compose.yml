@@ -11,3 +11,6 @@ services:
       - ../cyber_stats.db:/app/cyber_stats.db
     networks:
       - slacknet
+  
+networks:
+  slacknet:
