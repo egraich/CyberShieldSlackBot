@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  slackbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: slackbot
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    volumes:
+      - ../cyber_stats.db:/app/cyber_stats.db
