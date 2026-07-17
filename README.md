@@ -1,6 +1,6 @@
 # CyberShield
 
-![Python](https://shields.io) &nbsp; ![Slack](https://shields.io) &nbsp; ![License](https://shields.io)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue?style=flat-square&logo=python&logoColor=white) &nbsp; ![Slack](https://img.shields.io/badge/Slack-Bolt%20for%20Python-4A154B?style=flat&logo=slack) &nbsp; ![License](https://shields.io)
 
 A Slack bot that checks messages and links for scams, phishing, and social engineering using LLMs and VirusTotal.
 
