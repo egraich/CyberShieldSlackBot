@@ -111,7 +111,7 @@ Ensure your server has Docker and Docker Compose installed.
 5. **Launch the Container:**
    Navigate into the code directory and boot up the application:
    ```bash
-   cd src
+   cd src/
    docker compose up -d --build
    ```
    >Note: Use `docker-compose up -d --build` if your server uses Docker Compose v1.
