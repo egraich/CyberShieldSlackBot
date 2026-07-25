@@ -123,4 +123,4 @@ Ensure your server has Docker and Docker Compose installed.
 * **Groq SDK** – Llama 3.3 inference provider.
 * **VirusTotal API v3** – URL reputation telemetry.
 
-Made by [egraich](https://github.com/egraich) <3
+Made by [egraich](https://egraich.dev) <3
