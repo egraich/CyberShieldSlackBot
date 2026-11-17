@@ -77,47 +77,6 @@ For 24/7 availability, the bot is officially containerized with Docker and deplo
 
 ---
 
-## Deployment
-
-This project is fully containerized and optimized for rapid production deployment using Docker and Docker Compose. Follow the steps below to deploy the bot on your remote Linux server:
-
-### Prerequisites
-Ensure your server has Docker and Docker Compose installed.
-
-### Installation Steps
-
-1. **Navigate to your workspace directory:**
-   ```bash
-   cd /path/to/your/projects
-   ```
-
-2. **Clone the repository:**
-   ```bash
-   git clone https://github.com/egraich/cybershieldslackbot
-   ```
-
-3. **Restructure directories for database persistence and isolation:**
-   ```bash
-   mv cybershieldslackbot src
-   ```
-
-4. **Configure Environment Variables:**
-   Create and fill a `.env` file **outside** the `src/` directory to protect your secret tokens:
-   ```bash
-   nano .env
-   ```
-   *Paste your keys as described in the local configuration section.*
-
-5. **Launch the Container:**
-   Navigate into the code directory and boot up the application:
-   ```bash
-   cd src/
-   docker compose up -d --build
-   ```
-   >Note: Use `docker-compose up -d --build` if your server uses Docker Compose v1.
-
----
-
 ## Credits
 * **slack-bolt** – Async Slack framework core.
 * **Groq SDK** – Llama 3.3 inference provider.
